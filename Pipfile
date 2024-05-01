@@ -6,10 +6,14 @@ name = "pypi"
 [packages]
 Flask = "*"
 flask-caching = "*"
+requests = "*"
+pydantic = "*"
+python-dotenv = "*"
 
 [dev-packages]
 pytest = "*"
 pytest-mock = "*"
+pytest-html = "*"
 
 [requires]
 python_version = "3.12"
