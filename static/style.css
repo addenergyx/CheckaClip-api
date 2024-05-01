@@ -1,0 +1,13 @@
+.container {
+    margin-top: 20px;
+}
+
+iframe {
+    width: 75%;
+    height: 200px;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
