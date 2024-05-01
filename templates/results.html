@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <h2>Video</h2>
+    {% if video_url %}
+    <iframe src="{{ video_url }}" allowfullscreen></iframe>
+    {% else %}
+    <p>No video found</p>
+    {% endif %}
+
+    <h2>Images</h2>
+    <div>
+        {% for image_url in image_urls %}
+        <img src="{{ image_url }}" alt="Image">
+        {% else %}
+        <p>No images found</p>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('home') }}">New Search</a>
+</body>
+</html>
