@@ -65,9 +65,9 @@ def results():
 
     # Internal request to the API endpoint for images
     images_response = requests.get(url_for('get_images', search_term=search_term, _external=True))
-    image_urls = images_response.json()['urls'] if images_response.ok else []
+    image_url = images_response.json()['urls'][0] if images_response.ok else None
 
-    return render_template('results.html', video_url=embedded_video_url, image_urls=image_urls)
+    return render_template('results.html', video_url=embedded_video_url, image_url=image_url)
 
 
 @app.route('/api/v1/shorts', methods=['GET'])
