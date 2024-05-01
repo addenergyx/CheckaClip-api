@@ -17,6 +17,15 @@ Youtube Data API key
 
 Tests can be run with `make tests`
 
+## API
+The API has the following endpoints:
+- /api/v1/shorts - GET - Returns urls of short videos
+- /api/v1/images - GET - Returns urls of images
+
+query parameters:
+- search_term: The search term to search for
+- max_results: The maximum number of results to return
+
 ## Notes: 
 You may find that some embedded YouTube videos are showing "Video unavailable" when you try and view them in the app, like this: 
 The reason for this may be that they have copyrighted music in the background and for copyright reasons, 
