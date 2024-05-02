@@ -78,6 +78,15 @@ def results():
     return render_template('results.html', video_url=embedded_video_url, image_url=image_url)
 
 
+def build_validation_error_response(errors: list[dict]) -> dict:
+    return {
+        'status': 400,
+        'body': {
+            'errors': {error['loc'][0]: error['msg'] for error in errors}
+        }
+    }
+
+
 @app.route('/api/v1/shorts', methods=['GET'])
 def get_shorts():
     try:
@@ -86,8 +95,8 @@ def get_shorts():
         video_url = fetch_youtube_shorts(search_args.search_term, search_args.max_results)
         return jsonify({'urls': video_url}), 200
     except ValidationError as ve:
-        errors = {error['loc'][0]: error['msg'] for error in ve.errors()}
-        return jsonify(errors), 400
+        status_code = 400
+        return build_validation_error_response(ve.errors()), status_code
     except Exception:
         return jsonify({"error": "Failed to fetch data from YouTube"}), 500
 
@@ -119,8 +128,9 @@ def get_images():
         images = fetch_images(search_args.search_term)
         randomised_images = randomise_images(images)
         return jsonify({"urls": randomised_images}), 200
-    except ValidationError:
-        return {'errors': {'search_term': 'ensure this value has at least 1 characters'}}, 400
+    except ValidationError as ve:
+        status_code = 400
+        return build_validation_error_response(ve.errors()), status_code
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
