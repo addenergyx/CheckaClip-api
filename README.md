@@ -14,6 +14,7 @@ Youtube Data API key
 1. Clone the repository
 2. cd into the repository
 3. Run `make run` to start the app
+
 App will run on http://127.0.0.1:5000
 
 Tests can be run with `make tests`
