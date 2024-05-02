@@ -29,6 +29,8 @@ def convert_to_embed_url(video_url: str) -> str:
 
 @cache.memoize(timeout=600)
 def fetch_youtube_shorts(search_term: str, max_results: int) -> list[str] | None:
+
+    # https://developers.google.com/youtube/v3/docs/search/list
     youtube_api_key = app.config['YOUTUBE_API_KEY']
     youtube_search_url = 'https://www.googleapis.com/youtube/v3/search'
     params = {
@@ -52,7 +54,7 @@ def home():
         search_term = request.form.get('search_term')
 
         if not search_term:
-            flash('Search term is required', 'error')  # 'error' is a category for the flash message
+            flash('Search term is required', 'error')  # flash message requires a secret key
             return redirect(url_for('home'))
 
         return redirect(url_for('results', search_term=search_term))
