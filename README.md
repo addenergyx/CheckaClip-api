@@ -31,7 +31,8 @@ Example:
 http://127.0.0.1:5000/api/v1/shorts?search_term=cats&max_results=5
 
 returns
-`{
+```json
+{
   "urls": [
     "https://www.youtube.com/watch?v=3bhkYoMWTFE",
     "https://www.youtube.com/watch?v=NsMKvVdEPkw",
@@ -39,7 +40,9 @@ returns
     "https://www.youtube.com/watch?v=5WwVTuQmmkg",
     "https://www.youtube.com/watch?v=BvJ0DVSFHkk"
   ]
-}`
+}
+```
+
 
 
 ## Notes: 
