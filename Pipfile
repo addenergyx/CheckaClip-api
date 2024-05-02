@@ -9,6 +9,7 @@ flask-caching = "*"
 requests = "*"
 pydantic = "*"
 python-dotenv = "*"
+flask-restx = "*"
 
 [dev-packages]
 pytest = "*"

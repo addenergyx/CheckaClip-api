@@ -2,6 +2,7 @@ import os
 import random
 
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
+from flask_caching import Cache
 import requests
 from pydantic import ValidationError
 
@@ -15,12 +16,18 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASH_SECRET_KEY', 'secret_key')
 app.config['YOUTUBE_API_KEY'] = os.environ.get('YOUTUBE_API_KEY')
 
+app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+
+cache = Cache(app)
+
 
 def convert_to_embed_url(video_url: str) -> str:
     video_id = video_url.split('watch?v=')[1]
     return f'https://www.youtube.com/embed/{video_id}'
 
 
+@cache.memoize(timeout=600)
 def fetch_youtube_shorts(search_term: str, max_results: int) -> list[str] | None:
     youtube_api_key = app.config['YOUTUBE_API_KEY']
     youtube_search_url = 'https://www.googleapis.com/youtube/v3/search'
@@ -36,8 +43,7 @@ def fetch_youtube_shorts(search_term: str, max_results: int) -> list[str] | None
         json_data = response.json()
         return [f"https://www.youtube.com/watch?v={x['id']['videoId']}" for x in json_data['items']]
 
-    else:
-        raise Exception("Failed to fetch data from YouTube")
+    raise Exception("Failed to fetch data from YouTube")
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -84,29 +90,37 @@ def get_shorts():
         return jsonify({"error": "Failed to fetch data from YouTube"}), 500
 
 
-@app.route("/api/v1/images", methods=["GET"])
-def get_images():
-    try:
-        search_args = SearchRequest(search_term=request.args.get('search_term', None))
-    except ValidationError:
-        return {'errors': {'search_term': 'ensure this value has at least 1 characters'}}, 400
-
+@cache.memoize(timeout=600)
+def fetch_images(search_term: str) -> list[str] | None:
     # https://www.flickr.com/services/feeds/docs/photos_public/
     response = requests.get(
         "https://www.flickr.com/services/feeds/photos_public.gne",
         params={
             "format": "json",
-            "nojsoncallback": 1,  # return raw JSON
-            "tags": search_args.search_term
+            "nojsoncallback": 1,
+            "tags": search_term
         }
     )
-
     if response.status_code == 200:
-        json_data = response.json()
-        images = [x['media']['m'] for x in random.sample(json_data['items'], min(3, len(json_data['items'])))]
-        return jsonify({"urls": images}), 200
+        return response.json()['items']
+    raise Exception("Failed to fetch data from Flickr")
 
-    return jsonify({"error": ""}), response.status_code
+
+def randomise_images(images: list[any], default_max=3) -> list[str]:
+    return [x['media']['m'] for x in random.sample(images, min(default_max, len(images)))]
+
+
+@app.route("/api/v1/images", methods=["GET"])
+def get_images():
+    try:
+        search_args = SearchRequest(search_term=request.args.get('search_term', None))
+        images = fetch_images(search_args.search_term)
+        randomised_images = randomise_images(images)
+        return jsonify({"urls": randomised_images}), 200
+    except ValidationError:
+        return {'errors': {'search_term': 'ensure this value has at least 1 characters'}}, 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
